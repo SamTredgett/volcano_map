@@ -26,17 +26,24 @@ def color_decider(elevation:float):
 
 
 # Generate Feature Group
-fg=folium.FeatureGroup(name="My Map")
+fgv=folium.FeatureGroup(name="Volcanoes")
 # Iterate through a list of coordinates and plot markers in each location with a popup message
 for latitude, longitude, name, stat, elev, volc_type in zip(lat,lon,volcano_names,status,elevation,volcano_type):
 	# Popup string generation
 	popup_info : str = f'This volcano is called {name}, and is a {volc_type} that stands at {elev}m tall. ({stat})'
 	# Add the marker
-	fg.add_child(folium.CircleMarker(location=[latitude,longitude],radius=8.0,popup=popup_info, fill_color=color_decider(elev), fill_opacity=0.8))
-fg.add_child(folium.GeoJson(data=(open('world.json', 'r', encoding='utf-8-sig').read())))
+	fgv.add_child(folium.CircleMarker(location=[latitude,longitude],radius=8.0,popup=popup_info, fill_color=color_decider(elev), fill_opacity=0.8))
 
-# Add the featuregroup of markers to map
+fg=folium.FeatureGroup(name="Population")
+
+# Kind of a complex lambda for solving population colours in-line
+fg.add_child(folium.GeoJson(data=open('world.json', 'r', encoding='utf-8-sig').read(), 
+style_function=lambda x: {'fillColor':'green' if
+x['properties']['POP2005'] < 10000000 else 'orange' if 10000000 <= x['properties']['POP2005'] < 20000000 else 'red'}))
+
 map.add_child(fg)
+map.add_child(fgv)
+map.add_child(folium.LayerControl())
 
 # create map file
 map.save("Map1.html")
